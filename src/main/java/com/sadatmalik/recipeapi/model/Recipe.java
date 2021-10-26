@@ -78,8 +78,9 @@ public class Recipe {
     }
 
     public void calculateAverageRating() {
+        averageRating = 0.0;
+
         if (!reviews.isEmpty()) {
-            averageRating = 0.0;
             for (Review review : reviews) {
                 averageRating += review.getRating();
             }

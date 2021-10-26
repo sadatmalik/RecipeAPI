@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/recipes")
@@ -50,6 +52,20 @@ public class RecipeController {
     public ResponseEntity<?> getRecipesByName(@PathVariable("name") String name) {
         try {
             ArrayList<Recipe> matchingRecipes = recipeService.getRecipesByName(name);
+            return ResponseEntity.ok(matchingRecipes);
+        } catch (NoSuchRecipeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/search/rating/{min}")
+    public ResponseEntity<?> getRecipesByMinRating(@PathVariable("min") Long min) {
+        try {
+
+            List<Recipe> matchingRecipes = recipeService.getAllRecipes().stream()
+                    .filter(recipe -> recipe.getAverageRating() >= min)
+                    .collect(Collectors.toList());
+
             return ResponseEntity.ok(matchingRecipes);
         } catch (NoSuchRecipeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
