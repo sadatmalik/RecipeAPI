@@ -27,10 +27,9 @@ public class Review {
 
     private String description;
 
-    public void setRating(int rating) {
+    public void validate() throws IllegalStateException {
         if (rating <= 0 || rating > 10) {
-            throw new IllegalStateException("Rating must be between 0 and 10.");
+            throw new IllegalStateException("Must include a Rating must be between 0 and 10.");
         }
-        this.rating = rating;
     }
 }
