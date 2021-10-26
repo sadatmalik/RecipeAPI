@@ -25,6 +25,9 @@ public class Recipe {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = true)
+    private String username;
+
     @Column(nullable = false)
     private Integer minutesToMake;
 
