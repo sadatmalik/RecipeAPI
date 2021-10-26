@@ -47,6 +47,9 @@ public class Recipe {
     @JsonIgnore
     private URI locationURI;
 
+    @Transient
+    private Double averageRating;
+
     public void setDifficultyRating(int difficultyRating) {
         if (difficultyRating < 0 || difficultyRating > 10) {
             throw new IllegalStateException("Difficulty rating must be between 0 and 10.");
@@ -71,6 +74,16 @@ public class Recipe {
                             .toUriString());
         } catch (URISyntaxException e) {
             //Exception should stop here.
+        }
+    }
+
+    public void calculateAverageRating() {
+        if (!reviews.isEmpty()) {
+            averageRating = 0.0;
+            for (Review review : reviews) {
+                averageRating += review.getRating();
+            }
+            averageRating /= reviews.size();
         }
     }
 }
