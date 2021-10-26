@@ -2,6 +2,7 @@ package com.sadatmalik.recipeapi.controllers;
 
 import com.sadatmalik.recipeapi.exceptions.NoSuchRecipeException;
 import com.sadatmalik.recipeapi.exceptions.NoSuchReviewException;
+import com.sadatmalik.recipeapi.exceptions.UserException;
 import com.sadatmalik.recipeapi.model.Recipe;
 import com.sadatmalik.recipeapi.model.Review;
 import com.sadatmalik.recipeapi.services.ReviewService;
@@ -53,7 +54,7 @@ public class ReviewController {
         try {
             Recipe insertedRecipe = reviewService.postNewReview(review, recipeId);
             return ResponseEntity.created(insertedRecipe.getLocationURI()).body(insertedRecipe);
-        } catch (NoSuchRecipeException e) {
+        } catch (NoSuchRecipeException | UserException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

@@ -1,10 +1,11 @@
 package com.sadatmalik.recipeapi.services;
 
-import com.sadatmalik.recipeapi.repositories.ReviewRepo;
-import com.sadatmalik.recipeapi.model.Recipe;
-import com.sadatmalik.recipeapi.model.Review;
 import com.sadatmalik.recipeapi.exceptions.NoSuchRecipeException;
 import com.sadatmalik.recipeapi.exceptions.NoSuchReviewException;
+import com.sadatmalik.recipeapi.exceptions.UserException;
+import com.sadatmalik.recipeapi.model.Recipe;
+import com.sadatmalik.recipeapi.model.Review;
+import com.sadatmalik.recipeapi.repositories.ReviewRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -50,8 +51,11 @@ public class ReviewService {
         return reviews;
     }
 
-    public Recipe postNewReview(Review review, Long recipeId) throws NoSuchRecipeException {
+    public Recipe postNewReview(Review review, Long recipeId) throws NoSuchRecipeException, UserException {
         Recipe recipe = recipeService.getRecipeById(recipeId);
+        if (recipe.getUsername().equals(review.getUsername())) {
+            throw new UserException("Nice try - reviewing your own handy work, eh? Sorry, that's not allowed :-)");
+        }
         recipe.getReviews().add(review);
         recipeService.updateRecipe(recipe, false);
         return recipe;
