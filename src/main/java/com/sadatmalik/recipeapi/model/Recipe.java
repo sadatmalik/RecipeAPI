@@ -66,6 +66,20 @@ public class Recipe {
         } else if (steps.size() == 0) {
             throw new IllegalStateException("You have to include at least one step for your recipe!");
         }
+        // name
+        if (name == null || name.equals("")) {
+            throw new IllegalStateException("Your recipe must have a name!");
+        }
+
+        // minutes to make
+        if (minutesToMake == null || minutesToMake <= 0) {
+            throw new IllegalStateException("Your recipe must have minutesToMake > 0");
+        }
+
+        // difficulty rating
+        if (difficultyRating == null || difficultyRating < 1 || difficultyRating > 3) {
+            throw new IllegalStateException("Your recipe must have a difficulty rating between 1 and 3");
+        }
     }
 
     public void generateLocationURI() {
@@ -83,7 +97,7 @@ public class Recipe {
     public void calculateAverageRating() {
         averageRating = 0.0;
 
-        if (!reviews.isEmpty()) {
+        if (reviews != null && !reviews.isEmpty()) {
             for (Review review : reviews) {
                 averageRating += review.getRating();
             }

@@ -31,5 +31,9 @@ public class Review {
         if (rating <= 0 || rating > 10) {
             throw new IllegalStateException("Must include a Rating must be between 0 and 10.");
         }
+
+        if (username == null || username.equals("")) {
+            throw new IllegalStateException("Username cannot be null.");
+        }
     }
 }
