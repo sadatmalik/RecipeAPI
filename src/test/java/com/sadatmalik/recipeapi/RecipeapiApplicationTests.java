@@ -1,9 +1,6 @@
 package com.sadatmalik.recipeapi;
 
-import com.sadatmalik.recipeapi.model.Ingredient;
-import com.sadatmalik.recipeapi.model.Recipe;
-import com.sadatmalik.recipeapi.model.Review;
-import com.sadatmalik.recipeapi.model.Step;
+import com.sadatmalik.recipeapi.model.*;
 import com.sadatmalik.recipeapi.repositories.RecipeRepo;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -123,7 +120,9 @@ class RecipeapiApplicationTests {
 		Step step1 = Step.builder().description("heat pan").stepNumber(1).build();
 		Step step2 = Step.builder().description("add sugar").stepNumber(2).build();
 
-		Review review = Review.builder().description("was just caramel").rating(3).username("idk").build();
+		CustomUserDetails idk = CustomUserDetails.builder().username("idk").build();
+
+		Review review = Review.builder().description("was just caramel").rating(3).user(idk).build();
 
 		Recipe recipe = Recipe.builder()
 				.name("caramel in a pan")

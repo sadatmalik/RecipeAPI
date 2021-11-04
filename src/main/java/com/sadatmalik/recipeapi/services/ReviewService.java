@@ -42,7 +42,7 @@ public class ReviewService {
     }
 
     public ArrayList<Review> getReviewByUsername(String username) throws NoSuchReviewException {
-        ArrayList<Review> reviews = reviewRepo.findByUsername(username);
+        ArrayList<Review> reviews = reviewRepo.findByUser_Username(username);
 
         if (reviews.isEmpty()) {
             throw new NoSuchReviewException("No reviews could be found for username " + username);
@@ -53,7 +53,7 @@ public class ReviewService {
 
     public Recipe postNewReview(Review review, Long recipeId) throws NoSuchRecipeException, UserException {
         Recipe recipe = recipeService.getRecipeById(recipeId);
-        if (recipe.getUsername().equals(review.getUsername())) {
+        if (recipe.getUser().getUsername().equals(review.getUser().getUsername())) {
             throw new UserException("Nice try - reviewing your own handy work, eh? Sorry, that's not allowed :-)");
         }
         recipe.getReviews().add(review);

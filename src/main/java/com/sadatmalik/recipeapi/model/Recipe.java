@@ -25,8 +25,10 @@ public class Recipe {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = true)
-    private String username;
+    @ManyToOne(optional = false)
+    @JoinColumn
+    @JsonIgnore
+    private CustomUserDetails user;
 
     @Column(nullable = false)
     private Integer minutesToMake;
@@ -103,5 +105,9 @@ public class Recipe {
             }
             averageRating /= reviews.size();
         }
+    }
+
+    public String getAuthor() {
+        return user.getUsername();
     }
 }

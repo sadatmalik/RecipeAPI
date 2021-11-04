@@ -9,5 +9,5 @@ import java.util.ArrayList;
 @Repository
 public interface ReviewRepo extends JpaRepository<Review, Long> {
 
-    ArrayList<Review> findByUsername(String username);
+    ArrayList<Review> findByUser_Username(String username);
 }

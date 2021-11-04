@@ -1,10 +1,9 @@
 package com.sadatmalik.recipeapi.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Entity
@@ -19,8 +18,10 @@ public class Review {
     @GeneratedValue
     private Long id;
 
-    @NotNull
-    private String username;
+    @ManyToOne(optional = false)
+    @JoinColumn
+    @JsonIgnore
+    private CustomUserDetails user;
 
     @NotNull
     private int rating;
@@ -31,9 +32,9 @@ public class Review {
         if (rating <= 0 || rating > 10) {
             throw new IllegalStateException("Must include a Rating must be between 0 and 10.");
         }
+    }
 
-        if (username == null || username.equals("")) {
-            throw new IllegalStateException("Username cannot be null.");
-        }
+    public String getAuthor() {
+        return user.getUsername();
     }
 }
