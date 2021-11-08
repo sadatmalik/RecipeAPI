@@ -1,6 +1,7 @@
 package com.sadatmalik.recipeapi.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -16,6 +17,7 @@ import java.util.Collection;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties("author") //this will ignore 'author' when converting json bytes to object for testing
 public class Recipe {
 
     @Id

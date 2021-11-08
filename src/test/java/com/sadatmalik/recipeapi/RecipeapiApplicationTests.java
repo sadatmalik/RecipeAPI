@@ -1,7 +1,11 @@
 package com.sadatmalik.recipeapi;
 
-import com.sadatmalik.recipeapi.model.*;
+import com.sadatmalik.recipeapi.model.CustomUserDetails;
+import com.sadatmalik.recipeapi.model.Ingredient;
+import com.sadatmalik.recipeapi.model.Recipe;
+import com.sadatmalik.recipeapi.model.Step;
 import com.sadatmalik.recipeapi.repositories.RecipeRepo;
+import com.sadatmalik.recipeapi.repositories.UserRepo;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -11,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -34,6 +39,9 @@ class RecipeapiApplicationTests {
 
 	@Autowired
 	RecipeRepo recipeRepo;
+
+	@Autowired
+	UserRepo userRepo;
 
 	@Test
 	@Order(1)
@@ -92,7 +100,7 @@ class RecipeapiApplicationTests {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
 
 				//expect there are 4 entries
-				.andExpect(jsonPath("$", hasSize(5)))
+				.andExpect(jsonPath("$", hasSize(4)))
 
 				//expect the first entry to have ID 1
 				.andExpect(jsonPath("$[0].id").value(1))
@@ -115,22 +123,25 @@ class RecipeapiApplicationTests {
 
 	@Test
 	@Order(4)
+	@WithUserDetails("maliksa")
 	public void testCreateNewRecipeSuccessBehavior() throws Exception {
 		Ingredient ingredient = Ingredient.builder().name("brown sugar").state("dry").amount("1 cup").build();
 		Step step1 = Step.builder().description("heat pan").stepNumber(1).build();
 		Step step2 = Step.builder().description("add sugar").stepNumber(2).build();
 
-		CustomUserDetails idk = CustomUserDetails.builder().username("idk").build();
+		// Don't think this works due to review needing authentication for user ben ?
+//		CustomUserDetails ben = userRepo.findByUsername("ben");
+//		Review review = Review.builder().description("was just caramel").rating(3).user(ben).build();
 
-		Review review = Review.builder().description("was just caramel").rating(3).user(idk).build();
-
+		CustomUserDetails maliksa = userRepo.findByUsername("maliksa");
 		Recipe recipe = Recipe.builder()
 				.name("caramel in a pan")
 				.difficultyRating(3)
 				.minutesToMake(2)
 				.ingredients(Set.of(ingredient))
 				.steps(Set.of(step1, step2))
-				.reviews(Set.of(review))
+				//.reviews(Set.of(review))
+				.user(maliksa)
 				.build();
 
 		MockHttpServletResponse response =
@@ -162,16 +173,19 @@ class RecipeapiApplicationTests {
 						.andExpect(jsonPath("steps[1]").isNotEmpty())
 
 						//confirm review data
-						.andExpect(jsonPath("reviews", hasSize(1)))
-						.andExpect(jsonPath("reviews[0].username").value("idk"))
+						.andExpect(jsonPath("reviews").isEmpty())
 						.andReturn().getResponse();
 	}
 
 	@Test
 	@Order(5)
+	@WithUserDetails("maliksa")
 	public void testCreateNewRecipeFailureBehavior() throws Exception {
 
 		Recipe recipe = new Recipe();
+
+		CustomUserDetails maliksa = userRepo.findByUsername("maliksa");
+		recipe.setUser(maliksa);
 
 		//force failure with empty Recipe object
 		this.mockMvc.perform(
@@ -262,9 +276,12 @@ class RecipeapiApplicationTests {
 
 	@Test
 	@Order(8)
+	@WithUserDetails("maliksa")
 	public void testDeleteRecipeByIdSuccessBehavior() throws Exception {
-		final long recipeId = 3;
-		//get the recipe with ID 3 for future error message confirmation
+		Recipe recipeToDelete = recipeRepo.findByNameContaining("caramel in a pan").get(0);
+		final long recipeId = recipeToDelete.getId();
+
+		//get the recipe with ID recipeId for future error message confirmation
 		byte[] responseByteArr = this.mockMvc.perform(get("/recipes/" + recipeId))
 				.andExpect(status().isOk())
 				//confirm correct recipe was returned
@@ -290,15 +307,16 @@ class RecipeapiApplicationTests {
 
 	@Test
 	@Order(9)
+	@WithUserDetails("maliksa")
 	public void testDeleteRecipeByIdFailureBehavior() throws Exception {
 		//force error with invalid ID
-		this.mockMvc.perform(delete("/recipes/-1"))
+		this.mockMvc.perform(delete("/recipes/5000"))
 				//expect 400 BAD REQUEST
 				.andExpect(status().isBadRequest())
 				//expect plain text aka a String
 				.andExpect(content().contentType(MediaType.TEXT_PLAIN_VALUE + ";charset=UTF-8"))
 				//confirm correct error message
-				.andExpect(content().string(is("No recipe with ID -1 could be found. Could not delete.")));
+				.andExpect(content().string(is("No recipe with ID 5000 could be found. Could not delete.")));
 	}
 
 //	@Test
