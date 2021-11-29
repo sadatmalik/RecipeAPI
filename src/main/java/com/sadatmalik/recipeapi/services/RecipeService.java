@@ -1,13 +1,18 @@
 package com.sadatmalik.recipeapi.services;
 
-import com.sadatmalik.recipeapi.repositories.RecipeRepo;
-import com.sadatmalik.recipeapi.model.Recipe;
 import com.sadatmalik.recipeapi.exceptions.NoSuchRecipeException;
+import com.sadatmalik.recipeapi.model.Ingredient;
+import com.sadatmalik.recipeapi.model.Recipe;
+import com.sadatmalik.recipeapi.model.Step;
+import com.sadatmalik.recipeapi.repositories.RecipeRepo;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Optional;
 
 @Service
@@ -25,6 +30,7 @@ public class RecipeService {
         return recipe;
     }
 
+    @Cacheable(value = "recipeCache", key = "#id", sync = true)
     public Recipe getRecipeById(Long id) throws NoSuchRecipeException {
         Optional<Recipe> recipeOptional = recipeRepo.findById(id);
 
@@ -33,6 +39,14 @@ public class RecipeService {
         }
 
         Recipe recipe = recipeOptional.get();
+
+        // initializing these collections to enable caching retrieval
+        Collection<Ingredient> ingredients = recipe.getIngredients();
+        Hibernate.initialize(ingredients);
+
+        Collection<Step> steps = recipe.getSteps();
+        Hibernate.initialize(steps);
+
         recipe.generateLocationURI();
         recipe.calculateAverageRating();
         return recipe;
