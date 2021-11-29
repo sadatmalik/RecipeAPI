@@ -3,6 +3,8 @@ package com.sadatmalik.recipeapi;
 import com.sadatmalik.recipeapi.model.*;
 import com.sadatmalik.recipeapi.repositories.RecipeRepo;
 import com.sadatmalik.recipeapi.repositories.UserRepo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,6 +18,8 @@ import java.util.Set;
 @Profile("test")
 public class RecipeapiMainTest implements CommandLineRunner {
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(RecipeapiMainTest.class);
+
     @Autowired
     private RecipeRepo recipeRepo;
 
@@ -27,7 +31,7 @@ public class RecipeapiMainTest implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        System.out.println("STARTING WITH TEST DATABASE SETUP");
+        LOGGER.info("STARTING WITH TEST DATABASE SETUP");
 
         if (recipeRepo.findAll().isEmpty()) {
 
@@ -124,9 +128,9 @@ public class RecipeapiMainTest implements CommandLineRunner {
                     .build();
 
             recipeRepo.save(recipe4);
-            System.out.println("FINISHED TEST DATABASE SETUP");
+            LOGGER.info("FINISHED TEST DATABASE SETUP");
         } else {
-            System.out.println("DATABASE ALREADY CONTAINS ENTRIES - NOT ADDING ADDITIONAL TEST ENTRIES ");
+            LOGGER.info("DATABASE ALREADY CONTAINS ENTRIES - NOT ADDING ADDITIONAL TEST ENTRIES ");
         }
     }
 }
