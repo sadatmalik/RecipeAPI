@@ -5,6 +5,7 @@ import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Getter
@@ -12,7 +13,9 @@ import javax.persistence.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Role implements GrantedAuthority {
+public class Role implements GrantedAuthority, Serializable {
+
+    private static final long serialVersionUID = 6674365810438520812L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

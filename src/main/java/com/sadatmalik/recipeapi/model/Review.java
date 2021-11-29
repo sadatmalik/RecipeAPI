@@ -6,6 +6,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 
 @Entity
 @Getter
@@ -14,7 +15,9 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties("author") //this will ignore 'author' when converting json bytes to object for testing
-public class Review {
+public class Review implements Serializable {
+
+    private static final long serialVersionUID = 3052491181108747090L;
 
     @Id
     @GeneratedValue

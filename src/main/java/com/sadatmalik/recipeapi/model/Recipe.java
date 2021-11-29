@@ -6,6 +6,7 @@ import lombok.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -18,7 +19,9 @@ import java.util.Collection;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties("author") //this will ignore 'author' when converting json bytes to object for testing
-public class Recipe {
+public class Recipe implements Serializable {
+
+    private static final long serialVersionUID = -7949601140835616356L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
