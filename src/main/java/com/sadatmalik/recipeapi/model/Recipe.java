@@ -85,8 +85,8 @@ public class Recipe implements Serializable {
         }
 
         // difficulty rating
-        if (difficultyRating == null || difficultyRating < 1 || difficultyRating > 3) {
-            throw new IllegalStateException("Your recipe must have a difficulty rating between 1 and 3");
+        if (difficultyRating == null || difficultyRating < 1 || difficultyRating > 10) {
+            throw new IllegalStateException("Your recipe must have a difficulty rating between 1 and 10");
         }
     }
 
