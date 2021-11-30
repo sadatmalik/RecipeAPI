@@ -1,6 +1,7 @@
 package com.sadatmalik.recipeapi.controllers;
 
 import com.sadatmalik.recipeapi.exceptions.NoSuchRecipeException;
+import com.sadatmalik.recipeapi.model.CustomUserDetails;
 import com.sadatmalik.recipeapi.model.Recipe;
 import com.sadatmalik.recipeapi.services.CustomUserDetailsService;
 import com.sadatmalik.recipeapi.services.RecipeService;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -105,7 +107,12 @@ public class RecipeController {
     @PatchMapping
     //make sure that a user is either an admin or the owner of the recipe before they are allowed to update
     @PreAuthorize("hasPermission(#updatedRecipe.id, 'Recipe', 'edit')")
-    public ResponseEntity<?> updateRecipe(@RequestBody Recipe updatedRecipe) {
+    public ResponseEntity<?> updateRecipe(Authentication authentication,
+                                          @RequestBody Recipe updatedRecipe) {
+
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        updatedRecipe.setUser(userDetails);
+
         try {
             Recipe returnedUpdatedRecipe = recipeService.updateRecipe(updatedRecipe, true);
             return ResponseEntity.ok(returnedUpdatedRecipe);
