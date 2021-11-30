@@ -46,4 +46,9 @@
         <value-type>com.sadatmalik.recipeapi.model.Review</value-type>
     </cache>
 
+    <cache alias="reviewListCache" uses-template="default">
+        <key-type>java.lang.String</key-type>
+        <value-type>java.util.ArrayList</value-type>
+    </cache>
+
 </config>
