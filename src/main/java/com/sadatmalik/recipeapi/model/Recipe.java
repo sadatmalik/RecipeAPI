@@ -3,6 +3,7 @@ package com.sadatmalik.recipeapi.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
+import org.hibernate.Hibernate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.persistence.*;
@@ -114,5 +115,11 @@ public class Recipe implements Serializable {
 
     public String getAuthor() {
         return user.getUsername();
+    }
+
+    // Calls hibernate.initialize on collections to enable caching retrieval
+    public void initialize() {
+        Hibernate.initialize(this.ingredients);
+        Hibernate.initialize(this.steps);
     }
 }
