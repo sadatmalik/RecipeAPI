@@ -96,7 +96,7 @@ public class ReviewService {
     }
 
     @Caching(put = @CachePut(value = "reviewCache", key = "#result.id"),
-            evict = @CacheEvict(value = "recipeListCache", allEntries = true))
+            evict = @CacheEvict(value = "reviewListCache", allEntries = true))
     public Review updateReviewById(Review reviewToUpdate) throws NoSuchReviewException {
         try {
             Review review = getReviewById(reviewToUpdate.getId());
