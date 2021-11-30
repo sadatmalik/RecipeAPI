@@ -29,7 +29,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     //allow all requests to read recipes and reviews
                     .antMatchers(HttpMethod.GET, "/recipes/**", "/review/**").permitAll()
                     //allow all requests to create a user account or post review
-                    .antMatchers(HttpMethod.POST, "/user").permitAll()
+                    .antMatchers(HttpMethod.POST, "/user", "/review/**").permitAll()
                     //allow creation of new recipes only by authenticated users
                     .antMatchers(HttpMethod.POST, "/recipes", "/review/**").authenticated()
                     //all other requests should be authenticated
