@@ -1,27 +1,30 @@
 package com.sadatmalik.recipeapi.services;
 
 import com.sadatmalik.recipeapi.exceptions.NoSuchRecipeException;
-import com.sadatmalik.recipeapi.model.Ingredient;
 import com.sadatmalik.recipeapi.model.Recipe;
-import com.sadatmalik.recipeapi.model.Step;
 import com.sadatmalik.recipeapi.repositories.RecipeRepo;
-import org.hibernate.Hibernate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Optional;
 
 @Service
 public class RecipeService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(RecipeService.class);
+
     @Autowired
     RecipeRepo recipeRepo;
 
     @Transactional
+    @CacheEvict(value = { "recipeCache", "recipeListCache" }, allEntries = true)
     public Recipe createNewRecipe(Recipe recipe) throws IllegalStateException {
         recipe.validate();
         recipe = recipeRepo.save(recipe);
@@ -40,18 +43,18 @@ public class RecipeService {
 
         Recipe recipe = recipeOptional.get();
 
-        // initializing these collections to enable caching retrieval
-        Collection<Ingredient> ingredients = recipe.getIngredients();
-        Hibernate.initialize(ingredients);
-
-        Collection<Step> steps = recipe.getSteps();
-        Hibernate.initialize(steps);
+        // initialize collections for cache
+        recipe.initialize();
 
         recipe.generateLocationURI();
         recipe.calculateAverageRating();
+
+        LOGGER.info("Returning recipe from DB: " + recipe);
+
         return recipe;
     }
 
+    @Cacheable(value = "recipeListCache", key = "'username:' + #username", sync = true)
     public ArrayList<Recipe> getRecipesByUser(String username) throws NoSuchRecipeException {
         ArrayList<Recipe> matchingRecipes = recipeRepo.findByUser_Username(username);
 
@@ -62,10 +65,15 @@ public class RecipeService {
         for (Recipe r : matchingRecipes) {
             r.generateLocationURI();
             r.calculateAverageRating();
+            r.initialize();
         }
+
+        LOGGER.info("Returning recipes for username '" + username + "' from DB: " + matchingRecipes);
+
         return matchingRecipes;
     }
 
+    @Cacheable(value = "recipeListCache", key = "'name:' + #name", sync = true)
     public ArrayList<Recipe> getRecipesByName(String name) throws NoSuchRecipeException {
         ArrayList<Recipe> matchingRecipes = recipeRepo.findByNameContaining(name);
 
@@ -76,10 +84,15 @@ public class RecipeService {
         for (Recipe r : matchingRecipes) {
             r.generateLocationURI();
             r.calculateAverageRating();
+            r.initialize();
         }
+
+        LOGGER.info("Returning recipes for name '" + name + "' from DB: " + matchingRecipes);
+
         return matchingRecipes;
     }
 
+    @Cacheable(value = "recipeListCache", key = "'all'", sync = true)
     public ArrayList<Recipe> getAllRecipes() throws NoSuchRecipeException {
         ArrayList<Recipe> recipes = new ArrayList<>(recipeRepo.findAll());
 
@@ -89,11 +102,19 @@ public class RecipeService {
         for (Recipe r : recipes) {
             r.generateLocationURI();
             r.calculateAverageRating();
+            r.initialize();
         }
+
+        LOGGER.info("Returning all recipe from DB: " + recipes);
+
         return recipes;
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "recipeCache", key = "#id"),
+            @CacheEvict(value = "recipeListCache", allEntries = true)
+    })
     public Recipe deleteRecipeById(Long id) throws NoSuchRecipeException {
         try {
             Recipe recipe = getRecipeById(id);
@@ -105,6 +126,10 @@ public class RecipeService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "recipeCache", key = "#recipe.id"),
+            @CacheEvict(value = "recipeListCache", allEntries = true)
+    })
     public Recipe updateRecipe(Recipe recipe, boolean forceIdCheck) throws NoSuchRecipeException {
         try {
             if (forceIdCheck) {
