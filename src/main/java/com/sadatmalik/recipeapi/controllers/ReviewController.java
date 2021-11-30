@@ -3,6 +3,7 @@ package com.sadatmalik.recipeapi.controllers;
 import com.sadatmalik.recipeapi.exceptions.NoSuchRecipeException;
 import com.sadatmalik.recipeapi.exceptions.NoSuchReviewException;
 import com.sadatmalik.recipeapi.exceptions.UserException;
+import com.sadatmalik.recipeapi.model.CustomUserDetails;
 import com.sadatmalik.recipeapi.model.Recipe;
 import com.sadatmalik.recipeapi.model.Review;
 import com.sadatmalik.recipeapi.services.CustomUserDetailsService;
@@ -10,9 +11,9 @@ import com.sadatmalik.recipeapi.services.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.ArrayList;
 
 @RestController
@@ -57,10 +58,11 @@ public class ReviewController {
 
     @PostMapping("/{recipeId}")
     public ResponseEntity<?> postNewReview(@RequestBody Review review, @PathVariable("recipeId") Long recipeId,
-                                           Principal principal) {
+                                           Authentication authentication) {
         try {
             review.validate();
-            review.setUser(customUserDetailsService.getUser(principal.getName()));
+            review.setUser((CustomUserDetails) authentication.getPrincipal());
+
             Recipe insertedRecipe = reviewService.postNewReview(review, recipeId);
             return ResponseEntity.created(insertedRecipe.getLocationURI()).body(insertedRecipe);
         } catch (NoSuchRecipeException | UserException | IllegalStateException e) {
@@ -81,7 +83,11 @@ public class ReviewController {
 
     @PatchMapping
     @PreAuthorize("hasPermission(#reviewToUpdate.id, 'Review', 'edit')")
-    public ResponseEntity<?> updateReviewById(@RequestBody Review reviewToUpdate) {
+    public ResponseEntity<?> updateReviewById(@RequestBody Review reviewToUpdate,
+                                              Authentication authentication) {
+
+        reviewToUpdate.setUser((CustomUserDetails) authentication.getPrincipal());
+
         try {
             Review review = reviewService.updateReviewById(reviewToUpdate);
             return ResponseEntity.ok(review);
